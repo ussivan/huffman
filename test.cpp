@@ -44,11 +44,11 @@ int main(){
     test("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaabcaaaaaaaaaaaaaaaaaaaaaaaa");
     test("qwertyuiop[]asdfghjkl;'zxcvbnm,./1234567890!@#$%^&*()-+-=");
     randomTest(10, 1000);
-    randomTest(100, 1000);
-    randomTest(1000, 100);
-    randomTest(100000, 100);
-    randomTest(1000000, 10);
-    randomTest(10000000, 1);
+//    randomTest(100, 1000);
+//    randomTest(1000, 100);
+//    randomTest(100000, 100);
+//    randomTest(1000000, 10);
+//    randomTest(10000000, 1);
 //    randomTest(100000000, 1);
     return 0;
 }

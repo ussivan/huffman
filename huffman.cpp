@@ -5,8 +5,10 @@
 #include <algorithm>
 #include <fstream>
 
+#include "huffman.h"
 
 namespace huffman {
+
     struct node {
         std::unique_ptr<node> left, right;
         unsigned char val;
@@ -20,11 +22,11 @@ namespace huffman {
     };
 
     std::string toCharString(uint64_t num, uint32_t length) {
-        length = (length + 7) / 8;
+        length = (length + BYTE_LENGTH - 1) / BYTE_LENGTH;
         std::string ans;
         for (size_t i = 0; i < length; i++) {
-            ans.push_back((unsigned char) (num % (1 << 8)));
-            num >>= 8;
+            ans.push_back((unsigned char) (num % (1 << BYTE_LENGTH)));
+            num >>= BYTE_LENGTH;
         }
         for (size_t i = 0; i < length / 2; i++) {
             std::swap(ans[i], ans[length - i - 1]);
@@ -35,7 +37,7 @@ namespace huffman {
     uint32_t charSeqToUI(std::string s, uint32_t length) {
         uint32_t ans = 0;
         for (size_t i = 0; i < length; i++) {
-            ans <<= 8;
+            ans <<= BYTE_LENGTH;
             ans += (unsigned char) s[i];
         }
         return ans;
@@ -58,8 +60,8 @@ namespace huffman {
             return a->priority > b->priority;
         };
         std::vector<ptr_t> queue;
-        queue.reserve(256);
-        for (size_t c = 0; c < 256; c++) {
+        queue.reserve(ALPHABET_SIZE);
+        for (size_t c = 0; c < ALPHABET_SIZE; c++) {
             queue.push_back(std::make_unique<node>(c, sym_count[c]));
         }
         std::make_heap(queue.begin(), queue.end(), cmp);
@@ -81,11 +83,11 @@ namespace huffman {
         return root;
     }
 
-    void encode(std::ifstream ifs, const std::string &outFileName = "out.txt") {
+    void encode(std::ifstream ifs, const std::string &outFileName) {
         // first - code, second - size
-        std::vector<std::pair<uint32_t, uint32_t>> codes(256);
+        std::vector<std::pair<uint32_t, uint32_t>> codes(ALPHABET_SIZE);
         std::ofstream ofs(outFileName);
-        uint32_t sym_count[256];
+        uint32_t sym_count[ALPHABET_SIZE];
         for (uint32_t &i : sym_count) {
             i = 0;
         }
@@ -97,11 +99,11 @@ namespace huffman {
         ptr_t root = make_tree(sym_count);
         dfs(root, std::pair<uint32_t, uint32_t>(0, 0), codes);
         uint32_t lastCount = 0;
-        for (size_t i = 0; i < 256; i++) {
-            ofs << toCharString(sym_count[i], 32);
-            lastCount += (sym_count[i] * codes[i].second) % 8;
+        for (size_t i = 0; i < ALPHABET_SIZE; i++) {
+            ofs << toCharString(sym_count[i], 4*BYTE_LENGTH);
+            lastCount += (sym_count[i] * codes[i].second) % BYTE_LENGTH;
         }
-        ofs << (unsigned char) (((lastCount + 7) % 8) + 1);
+        ofs << (unsigned char) (((lastCount + BYTE_LENGTH - 1) % BYTE_LENGTH) + 1);
         ifs.clear();   //  reset
         ifs.seekg(0, std::istream::beg);
         c = static_cast<unsigned char>(ifs.get());
@@ -114,16 +116,16 @@ namespace huffman {
             buff <<= codes[c].second;
             length += codes[c].second;
             buff += codes[c].first;
-            if (length > 8) {
-                ofs << toCharString(buff >> (length % 8), length - length % 8);
-                length = length % 8;
+            if (length > BYTE_LENGTH) {
+                ofs << toCharString(buff >> (length % BYTE_LENGTH), length - length % BYTE_LENGTH);
+                length = length % BYTE_LENGTH;
                 buff = buff % (1 << length);
             }
             c = static_cast<unsigned char>(ifs.get());
         }
-        buff <<= (8 - (((length + 7) % 8) + 1));
+        buff <<= (BYTE_LENGTH - (((length + BYTE_LENGTH - 1) % BYTE_LENGTH) + 1));
         if(length != 0) {
-            ofs << toCharString(buff, 8);
+            ofs << toCharString(buff, BYTE_LENGTH);
         }
         ofs.close();
         ifs.close();
@@ -140,12 +142,12 @@ namespace huffman {
         return walk(cur->left, code, length - 1, rest);
     }
 
-    void decode(std::ifstream encoded, const std::string &outFileName = "out.txt") {
+    void decode(std::ifstream encoded, const std::string &outFileName) {
         std::ofstream ofs(outFileName);
-        std::vector<std::pair<uint32_t, uint32_t>> codes(256);
-        uint32_t sym_count[256];
+        std::vector<std::pair<uint32_t, uint32_t>> codes(ALPHABET_SIZE);
+        uint32_t sym_count[ALPHABET_SIZE];
         unsigned char c;
-        for (size_t i = 0; i < 256; i++) {
+        for (size_t i = 0; i < ALPHABET_SIZE; i++) {
             std::string s;
             for (size_t j = 0; j < 4; j++) {
                 c = static_cast<unsigned char>(encoded.get());
@@ -159,11 +161,11 @@ namespace huffman {
         ptr_t root = make_tree(sym_count);
         dfs(root, std::pair<uint32_t, uint32_t>(0, 0), codes);
         uint32_t lastCount = 0;
-        for (size_t i = 0; i < 256; i++) {
-            lastCount += (sym_count[i] * codes[i].second) % 8;
+        for (size_t i = 0; i < ALPHABET_SIZE; i++) {
+            lastCount += (sym_count[i] * codes[i].second) % BYTE_LENGTH;
         }
-        lastCount = (unsigned char) (((lastCount + 7) % 8) + 1);
-        auto lastBitCount = encoded.get();
+        lastCount = (unsigned char) (((lastCount + BYTE_LENGTH - 1) % BYTE_LENGTH) + 1);
+        auto lastBitCount = (unsigned char) encoded.get();
         if(lastBitCount != lastCount) {
             throw std::logic_error("input file corrupted");
         }
@@ -171,10 +173,10 @@ namespace huffman {
         uint32_t length = 0;
         c = static_cast<unsigned char>(encoded.get());
         while (encoded.good()) {
-            length += 8;
-            buff <<= 8;
+            length += BYTE_LENGTH;
+            buff <<= BYTE_LENGTH;
             buff += c;
-            while (length >= 32) {
+            while (length >= 4 * BYTE_LENGTH) {
                 uint32_t rest;
                 ofs << walk(root, buff, length, rest);
                 buff = buff % (1LL << rest);
@@ -182,8 +184,8 @@ namespace huffman {
             }
             c = static_cast<unsigned char>(encoded.get());
         }
-        length -= (8 - lastBitCount);
-        buff >>= (8 - lastBitCount);
+        length -= (BYTE_LENGTH - lastBitCount);
+        buff >>= (BYTE_LENGTH - lastBitCount);
         while (length > 0) {
             uint32_t rest;
             ofs << walk(root, buff, length, rest);

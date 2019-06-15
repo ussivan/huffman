@@ -14,6 +14,9 @@
 #include <fstream>
 
 namespace huffman {
+    const uint32_t ALPHABET_SIZE = 256;
+    const uint32_t BYTE_LENGTH = 8;
+
     void encode(std::ifstream ifs, const std::string &outFileName = "out.txt");
 
     void decode(std::ifstream encoded, const std::string &outFileName = "out.txt");

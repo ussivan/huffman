@@ -19,4 +19,20 @@ algorithm
 -
 fstream
 -
+huffman.h
+/home/shirogiro/CLionProjects/huffman/huffman.h
+
+/home/shirogiro/CLionProjects/huffman/huffman.h
+iostream
+-
+map
+-
+queue
+-
+memory
+-
+algorithm
+-
+fstream
+-
 

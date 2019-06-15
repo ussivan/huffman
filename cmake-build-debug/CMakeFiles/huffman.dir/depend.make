@@ -5,4 +5,5 @@ CMakeFiles/huffman.dir/console.cpp.o: ../console.cpp
 CMakeFiles/huffman.dir/console.cpp.o: ../huffman.h
 
 CMakeFiles/huffman.dir/huffman.cpp.o: ../huffman.cpp
+CMakeFiles/huffman.dir/huffman.cpp.o: ../huffman.h
 
