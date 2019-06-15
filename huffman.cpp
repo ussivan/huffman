@@ -142,6 +142,7 @@ namespace huffman {
 
     void decode(std::ifstream encoded, const std::string &outFileName = "out.txt") {
         std::ofstream ofs(outFileName);
+        std::vector<std::pair<uint32_t, uint32_t>> codes(256);
         uint32_t sym_count[256];
         unsigned char c;
         for (size_t i = 0; i < 256; i++) {
@@ -149,14 +150,23 @@ namespace huffman {
             for (size_t j = 0; j < 4; j++) {
                 c = static_cast<unsigned char>(encoded.get());
                 if(!encoded.good()) {
-                    throw std::logic_error("file corrupted");
+                    throw std::logic_error("input file corrupted");
                 }
                 s += c;
             }
             sym_count[i] = charSeqToUI(s, 4);
         }
-        auto lastBitCount = encoded.get();
         ptr_t root = make_tree(sym_count);
+        dfs(root, std::pair<uint32_t, uint32_t>(0, 0), codes);
+        uint32_t lastCount = 0;
+        for (size_t i = 0; i < 256; i++) {
+            lastCount += (sym_count[i] * codes[i].second) % 8;
+        }
+        lastCount = (unsigned char) (((lastCount + 7) % 8) + 1);
+        auto lastBitCount = encoded.get();
+        if(lastBitCount != lastCount) {
+            throw std::logic_error("input file corrupted");
+        }
         uint64_t buff = 0;
         uint32_t length = 0;
         c = static_cast<unsigned char>(encoded.get());
