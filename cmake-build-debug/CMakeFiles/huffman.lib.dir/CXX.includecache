@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/shirogiro/CLionProjects/huffman/huffman.cpp
+iostream
+-
+map
+-
+queue
+-
+memory
+-
+algorithm
+-
+fstream
+-
+
