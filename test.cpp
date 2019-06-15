@@ -6,12 +6,12 @@
 
 void test(std::string s) {
 //    std::cout << "Testing " << s << std::endl;
-    std::ofstream ofs("in.txt", std::ofstream::out);
+    std::ofstream ofs("in.txt");
     ofs << s << std::endl;
     ofs.close();
-    huffman::encode(std::ifstream("in.txt", std::ifstream::in), "out.txt");
-    huffman::decode(std::ifstream("out.txt", std::ifstream::in), "output.txt");
-    std::ifstream ifs("output.txt", std::ifstream::in);
+    huffman::encode(std::ifstream("in.txt"), "out.txt");
+    huffman::decode(std::ifstream("out.txt"), "output.txt");
+    std::ifstream ifs("output.txt");
     char c = static_cast<char>(ifs.get());
     int i = 0;
     while(ifs.good()) {

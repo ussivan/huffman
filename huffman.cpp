@@ -12,7 +12,7 @@ namespace huffman {
         unsigned char val;
         uint32_t priority;
 
-        node(unsigned char val = 0, uint32_t priority = 0) : val(val), priority(priority) {
+        explicit node(unsigned char val = 0, uint32_t priority = 0) : val(val), priority(priority) {
             left = nullptr;
             right = nullptr;
         };
@@ -84,7 +84,7 @@ namespace huffman {
     void encode(std::ifstream ifs, const std::string &outFileName = "out.txt") {
         // first - code, second - size
         std::vector<std::pair<uint32_t, uint32_t>> codes(256);
-        std::ofstream ofs(outFileName, std::ofstream::out);
+        std::ofstream ofs(outFileName);
         uint32_t sym_count[256];
         for (uint32_t &i : sym_count) {
             i = 0;
@@ -141,13 +141,16 @@ namespace huffman {
     }
 
     void decode(std::ifstream encoded, const std::string &outFileName = "out.txt") {
-        std::ofstream ofs(outFileName, std::ofstream::out);
+        std::ofstream ofs(outFileName);
         uint32_t sym_count[256];
         unsigned char c;
         for (size_t i = 0; i < 256; i++) {
             std::string s;
             for (size_t j = 0; j < 4; j++) {
                 c = static_cast<unsigned char>(encoded.get());
+                if(!encoded.good()) {
+                    throw std::logic_error("file corrupted");
+                }
                 s += c;
             }
             sym_count[i] = charSeqToUI(s, 4);

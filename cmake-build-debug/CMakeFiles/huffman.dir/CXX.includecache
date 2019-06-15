@@ -6,13 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/shirogiro/CLionProjects/huffman/console.cpp
-cstring
--
-huffman.h
-/home/shirogiro/CLionProjects/huffman/huffman.h
-
-/home/shirogiro/CLionProjects/huffman/huffman.h
+/home/shirogiro/CLionProjects/huffman/huffman.cpp
 iostream
 -
 map

@@ -26,7 +26,12 @@ int main(int argc, char const* argv[]) {
             std::cout << "Input file is corrupted" << std::endl;
             return 0;
         }
-        huffman::decode(std::ifstream(argv[2]), argv[3]);
+        try {
+            huffman::decode(std::ifstream(argv[2]), argv[3]);
+        } catch (std::logic_error &e) {
+            std::cout << e.what() << std::endl;
+            return 0;
+        }
         std::cout << "Decoding completed!" << std::endl;
     } else {
         std::cout << "Usage: encode/decode <input filename> <output filename>" << std::endl;
